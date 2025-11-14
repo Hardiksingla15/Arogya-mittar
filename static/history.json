@@ -1,0 +1,75 @@
+{
+  "health_score": 60,
+  "records": [
+    {
+      "username": "hardiksingla15",
+      "symptom": "i have cold",
+      "reply": "\ud83d\udfe1 Mild. Rest, drink warm fluids, and take over-the-counter medication if needed. If symptoms persist for 2+ days, consider visiting a doctor.",
+      "severity": "mild",
+      "date": "2025-11-14 02:56"
+    },
+    {
+      "username": "hardiksingla15",
+      "symptom": "i am alll ok",
+      "reply": "\ud83d\udfe2 It's great to hear you're feeling well! Keep up with healthy habits like good hydration and sufficient rest to maintain your well-being.",
+      "severity": "normal",
+      "date": "2025-11-14 03:00"
+    },
+    {
+      "username": "hardiksingla15",
+      "symptom": "i have fever",
+      "reply": "\ud83d\udfe1 Get rest and stay hydrated. If symptoms persist for 2+ days, consider consulting a doctor.",
+      "severity": "mild",
+      "date": "2025-11-14 03:00"
+    },
+    {
+      "username": "hardiksingla15",
+      "symptom": "i have heart paining",
+      "reply": "\ud83d\udd34 Your symptom is serious and requires immediate attention. Visit a doctor immediately. Tell me your city.",
+      "severity": "serious",
+      "date": "2025-11-14 03:01"
+    },
+    {
+      "username": "hardik1223.becse24@chitkara.edu.in",
+      "symptom": "heart pain",
+      "reply": "\ud83d\udd34 This is a serious symptom. Visit a doctor immediately. Tell me your city.",
+      "severity": "serious",
+      "date": "2025-11-14 03:08"
+    },
+    {
+      "username": "hardik1223.becse24@chitkara.edu.in",
+      "symptom": "rajpura",
+      "reply": "\ud83d\udfe2 Please provide your specific symptoms for an accurate assessment. Ensure you are staying hydrated and monitoring your overall well-being.",
+      "severity": "normal",
+      "date": "2025-11-14 03:08"
+    },
+    {
+      "username": "hardik1223.becse24@chitkara.edu.in",
+      "symptom": "art pain",
+      "reply": "\ud83d\udfe2 Rest the affected area and avoid activities that trigger the pain. Gentle stretching or a warm compress might provide relief. Observe if the discomfort subsides with rest.",
+      "severity": "normal",
+      "date": "2025-11-14 03:08"
+    },
+    {
+      "username": "hardik1223.becse24@chitkara.edu.in",
+      "symptom": "heart pain",
+      "reply": "\ud83d\udd34 Seek emergency medical attention without delay. Heart pain can be a serious symptom. Visit a doctor immediately. Tell me your city.",
+      "severity": "serious",
+      "date": "2025-11-14 03:09"
+    },
+    {
+      "username": "hardik1223.becse24@chitkara.edu.in",
+      "symptom": "rajpura",
+      "reply": "\ud83d\udfe2 It seems you haven't provided any health symptoms. Please tell me your concerns for accurate assistance.",
+      "severity": "normal",
+      "date": "2025-11-14 03:09"
+    },
+    {
+      "username": "hardik1223.becse24@chitkara.edu.in",
+      "symptom": "heart pain",
+      "reply": "\ud83d\udd34 This is a serious symptom requiring immediate medical attention. Do not delay seeking care. Visit a doctor immediately. Tell me your city.",
+      "severity": "serious",
+      "date": "2025-11-14 03:09"
+    }
+  ]
+}

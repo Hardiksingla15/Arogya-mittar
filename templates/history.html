@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Arogya Gemini</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Arogya Gemini</div>
+        <div class="nav-links">
+            <a href="{{ url_for('chat') }}">Chat</a>
+            <a href="{{ url_for('hospitals') }}">Hospitals</a>
+            <a href="{{ url_for('history') }}">History</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="score-box">
+        <div class="gauge">
+            <div class="gauge-body">
+                <div class="gauge-fill" id="gaugeFill"></div>
+                <div class="gauge-cover" id="gaugeValue">{{ health_score }}</div>
+            </div>
+        </div>
+        <p class="score-label">Health Score</p>
+    </div>
+    
+    <div class="history-container">
+        <div class="glass-card">
+            <h1 class="neon-title">Health History</h1>
+            <p class="subtitle">Your last 20 health consultations</p>
+            
+            {% if history %}
+            <div class="history-table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Symptom</th>
+                            <th>Severity</th>
+                            <th>Reply</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in history|reverse %}
+                        <tr>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.symptom }}</td>
+                            <td>
+                                <span class="severity-badge severity-{{ record.severity }}">
+                                    {{ record.severity|upper }}
+                                </span>
+                            </td>
+                            <td class="reply-cell">{{ record.reply }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No history yet. Start chatting to see your health records here!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        function updateHealthScore(score) {
+            document.getElementById('gaugeValue').textContent = score;
+            const rotation = (score / 100) * 180 - 90;
+            document.getElementById('gaugeFill').style.transform = `rotate(${rotation}deg)`;
+        }
+        
+        updateHealthScore({{ health_score }});
+    </script>
+</body>
+</html>
+

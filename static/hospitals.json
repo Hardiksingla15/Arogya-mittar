@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Rajpura Community Hospital",
+    "city": "Rajpura",
+    "address": "Near Bus Stand",
+    "phone": "01765-245678",
+    "map": "https://maps.google.com/?q=Rajpura+Community+Hospital"
+  },
+  {
+    "name": "City General Hospital",
+    "city": "Chandigarh",
+    "address": "Sector 22",
+    "phone": "0172-456789",
+    "map": "https://maps.google.com/?q=City+General+Hospital+Chandigarh"
+  },
+  {
+    "name": "Metro Health Center",
+    "city": "Patiala",
+    "address": "Model Town",
+    "phone": "0175-234567",
+    "map": "https://maps.google.com/?q=Metro+Health+Center+Patiala"
+  }
+]
+

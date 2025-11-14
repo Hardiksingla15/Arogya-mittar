@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospitals - Arogya Gemini</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Arogya Gemini</div>
+        <div class="nav-links">
+            <a href="{{ url_for('chat') }}">Chat</a>
+            <a href="{{ url_for('hospitals') }}">Hospitals</a>
+            <a href="{{ url_for('history') }}">History</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="score-box">
+        <div class="gauge">
+            <div class="gauge-body">
+                <div class="gauge-fill" id="gaugeFill"></div>
+                <div class="gauge-cover" id="gaugeValue">0</div>
+            </div>
+        </div>
+        <p class="score-label">Health Score</p>
+    </div>
+    
+    <div class="hospitals-container">
+        <div class="glass-card">
+            <h1 class="neon-title">Find Hospitals</h1>
+            
+            <div class="search-section">
+                <input type="text" id="searchInput" placeholder="Search hospitals by name or city..." />
+                <button id="nearbyBtn" class="neon-button">Find Hospitals Near Me</button>
+            </div>
+            
+            <div id="map" class="map-container"></div>
+            
+            <div id="hospitalList" class="hospital-list">
+                {% for hospital in hospitals %}
+                <div class="hospital-item glass-bubble">
+                    <h3>{{ hospital.name }}</h3>
+                    <p><strong>City:</strong> {{ hospital.city }}</p>
+                    <p><strong>Address:</strong> {{ hospital.address }}</p>
+                    <p><strong>Phone:</strong> {{ hospital.phone }}</p>
+                    <a href="{{ hospital.map }}" target="_blank" class="map-link">View on Map</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        let map = null;
+        let markers = [];
+        
+        // Initialize map
+        function initMap(lat = 30.7333, lon = 76.7794) {
+            if (map) {
+                map.remove();
+            }
+            
+            map = L.map('map').setView([lat, lon], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+        }
+        
+        // Load health score
+        async function loadHealthScore() {
+            try {
+                const response = await fetch('/api/health-score');
+                const data = await response.json();
+                if (data.health_score !== undefined) {
+                    updateHealthScore(data.health_score);
+                }
+            } catch (error) {
+                console.error('Error loading health score:', error);
+            }
+        }
+        
+        function updateHealthScore(score) {
+            document.getElementById('gaugeValue').textContent = score;
+            const rotation = (score / 100) * 180 - 90;
+            document.getElementById('gaugeFill').style.transform = `rotate(${rotation}deg)`;
+        }
+        
+        function addMarker(lat, lon, name) {
+            const marker = L.marker([lat, lon]).addTo(map);
+            marker.bindPopup(name);
+            markers.push(marker);
+        }
+        
+        function clearMarkers() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+        }
+        
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.hospital-item');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? 'block' : 'none';
+            });
+        });
+        
+        // Find nearby hospitals
+        document.getElementById('nearbyBtn').addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                initMap(lat, lon);
+                addMarker(lat, lon, 'Your Location');
+                
+                try {
+                    const response = await fetch('/api/hospitals/nearby', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({lat, lon})
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Server error');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.hospitals && data.hospitals.length > 0) {
+                        clearMarkers();
+                        addMarker(lat, lon, 'Your Location');
+                        
+                        const listDiv = document.getElementById('hospitalList');
+                        listDiv.innerHTML = '';
+                        
+                        data.hospitals.forEach(hospital => {
+                            if (hospital.lat && hospital.lon) {
+                                addMarker(hospital.lat, hospital.lon, hospital.name);
+                                
+                                const item = document.createElement('div');
+                                item.className = 'hospital-item glass-bubble';
+                                item.innerHTML = `
+                                    <h3>${hospital.name}</h3>
+                                    <p><strong>Address:</strong> ${hospital.address}</p>
+                                `;
+                                listDiv.appendChild(item);
+                            }
+                        });
+                    } else {
+                        alert('No hospitals found nearby. Try searching manually.');
+                    }
+                } catch (error) {
+                    console.error('Hospital fetch error:', error);
+                    alert('Error fetching hospitals: ' + (error.message || 'Unknown error'));
+                }
+            }, (error) => {
+                let errorMsg = 'Unknown error';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = 'Location permission denied. Please enable location access in your browser settings.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = 'Location information unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg = 'Location request timed out.';
+                        break;
+                    default:
+                        errorMsg = error.message || 'Failed to get location';
+                }
+                console.error('Geolocation error:', error);
+                alert('Error getting location: ' + errorMsg);
+            }, {
+                timeout: 10000,
+                enableHighAccuracy: false
+            });
+        });
+        
+        // Initialize
+        initMap();
+        loadHealthScore();
+    </script>
+</body>
+</html>
+

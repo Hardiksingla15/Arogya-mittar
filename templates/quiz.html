@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Quiz - Arogya Gemini</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="glass-card quiz-card">
+            <h1 class="neon-title">Health Assessment Quiz</h1>
+            <p class="subtitle">Please answer all questions to get your health score</p>
+            
+            <form id="quizForm">
+                <div class="quiz-question">
+                    <label>1. How many hours do you sleep per night?</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="10" value="7" class="slider" data-question="0">
+                        <span class="slider-value">7 hours</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>2. Do you drink enough water daily? (glasses)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="10" value="5" class="slider" data-question="1">
+                        <span class="slider-value">5 glasses</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>3. How often do you exercise? (times per week)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="7" value="3" class="slider" data-question="2">
+                        <span class="slider-value">3 times</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>4. Daily screen time? (hours)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="12" value="6" class="slider" data-question="3">
+                        <span class="slider-value">6 hours</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>5. How stressed are you? (1=low, 10=high)</label>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="10" value="5" class="slider" data-question="4">
+                        <span class="slider-value">5</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>6. Junk food frequency? (times per week)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="14" value="3" class="slider" data-question="5">
+                        <span class="slider-value">3 times</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>7. Any smoking/alcohol habits? (0=none, 10=heavy)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="10" value="0" class="slider" data-question="6">
+                        <span class="slider-value">0</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>8. Any chronic disease? (0=none, 10=severe)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="10" value="0" class="slider" data-question="7">
+                        <span class="slider-value">0</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>9. Fruit/vegetable intake? (servings per day)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="10" value="3" class="slider" data-question="8">
+                        <span class="slider-value">3 servings</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-question">
+                    <label>10. Daily steps? (thousands)</label>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="20" value="5" class="slider" data-question="9">
+                        <span class="slider-value">5k steps</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="neon-button">Submit Quiz</button>
+            </form>
+            
+            <div id="quizResult" class="quiz-result"></div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script>
+        // Update slider values
+        document.querySelectorAll('.slider').forEach(slider => {
+            slider.addEventListener('input', function() {
+                const value = this.value;
+                const questionNum = parseInt(this.dataset.question);
+                const labels = [
+                    value + ' hours',
+                    value + ' glasses',
+                    value + ' times',
+                    value + ' hours',
+                    value,
+                    value + ' times',
+                    value,
+                    value,
+                    value + ' servings',
+                    value + 'k steps'
+                ];
+                this.nextElementSibling.textContent = labels[questionNum];
+            });
+        });
+        
+        document.getElementById('quizForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const sliders = document.querySelectorAll('.slider');
+            const answers = Array.from(sliders).map(s => {
+                const val = parseInt(s.value);
+                // Convert to 0-10 scale (each worth 10 points)
+                // For questions where lower is better (stress, junk food, smoking, chronic disease, screen time)
+                const questionNum = parseInt(s.dataset.question);
+                let score = 0;
+                
+                if (questionNum === 3) { // screen time - inverse (0-12 hours, max 12)
+                    score = Math.max(0, Math.min(10, 10 - (val / 12) * 10));
+                } else if (questionNum === 4) { // stress - inverse (1-10 scale)
+                    score = Math.max(0, 10 - val);
+                } else if (questionNum === 5) { // junk food - inverse (0-14 times per week)
+                    score = Math.max(0, Math.min(10, 10 - (val / 14) * 10));
+                } else if (questionNum === 6) { // smoking/alcohol - inverse (0-10)
+                    score = Math.max(0, 10 - val);
+                } else if (questionNum === 7) { // chronic disease - inverse (0-10)
+                    score = Math.max(0, 10 - val);
+                } else {
+                    // For positive questions, normalize to 0-10
+                    // Q0: sleep (0-10 hours) -> score = val
+                    // Q1: water (0-10 glasses) -> score = val
+                    // Q2: exercise (0-7 times) -> score = (val / 7) * 10
+                    // Q8: fruits (0-10 servings) -> score = val
+                    // Q9: steps (0-20k) -> score = (val / 20) * 10
+                    if (questionNum === 0) { // sleep
+                        score = Math.min(10, val);
+                    } else if (questionNum === 1) { // water
+                        score = Math.min(10, val);
+                    } else if (questionNum === 2) { // exercise
+                        score = Math.min(10, (val / 7) * 10);
+                    } else if (questionNum === 8) { // fruits
+                        score = Math.min(10, val);
+                    } else if (questionNum === 9) { // steps
+                        score = Math.min(10, (val / 20) * 10);
+                    } else {
+                        score = Math.min(10, val);
+                    }
+                }
+                
+                // Ensure integer value between 0-10
+                return Math.round(Math.max(0, Math.min(10, score)));
+            });
+            
+            try {
+                const response = await fetch('/quiz', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({answers})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const resultDiv = document.getElementById('quizResult');
+                    let message = '';
+                    if (data.score >= 80) {
+                        message = `🎉 Excellent! Your health score is ${data.score}. You're doing great!`;
+                    } else if (data.score >= 50) {
+                        message = `👍 Average. Your health score is ${data.score}. There's room for improvement.`;
+                    } else {
+                        message = `⚠️ Needs improvement. Your health score is ${data.score}. Focus on better health habits.`;
+                    }
+                    resultDiv.innerHTML = `<p class="result-message">${message}</p>`;
+                    resultDiv.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = '/chat';
+                    }, 2000);
+                } else {
+                    alert(data.message || 'Quiz submission failed');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
+
